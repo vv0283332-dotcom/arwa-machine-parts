@@ -201,83 +201,316 @@ async function loadStats() {
 async function loadProducts() {
 
   const response =
-    await api(
-      "/api/admin/products"
-    );
+    await api("/api/admin/products");
 
   const products =
     await response.json();
 
-
   $("#productsTable").innerHTML = `
 
-    <table>
+    <div class="inventory-toolbar">
 
-      <thead>
+      <strong>
+        ${products.length} product${products.length === 1 ? "" : "s"}
+      </strong>
 
-        <tr>
-          <th>Product</th>
-          <th>Category</th>
-          <th>Price</th>
-          <th>Stock</th>
-          <th>Status</th>
-        </tr>
+      <button
+        type="button"
+        onclick="loadProducts()"
+      >
+        Refresh
+      </button>
 
-      </thead>
+    </div>
 
-      <tbody>
+    <div class="inventory-grid">
 
-        ${products.map(product => `
+      ${products.length
 
-          <tr>
+        ? products.map(product => `
 
-            <td>
-              <strong>
-                ${escapeHtml(product.name)}
-              </strong>
-              <br>
-              <small>
-                ${product.id}
-              </small>
-            </td>
+          <article class="inventory-card">
 
-            <td>
-              ${escapeHtml(product.category)}
-            </td>
+            <div class="inventory-image">
 
-            <td>
               ${
-                product.price === null
-                  ? "Contact"
-                  : product.price
+                product.image
+                  ? `
+                    <img
+                      src="${escapeHtml(product.image)}"
+                      alt="${escapeHtml(product.name)}"
+                    >
+                  `
+                  : `
+                    <span>⚙</span>
+                  `
               }
-            </td>
 
-            <td>
-              ${product.stock}
-            </td>
+            </div>
 
-            <td>
-              <span class="status">
-                ${
-                  product.active
-                    ? "Active"
-                    : "Hidden"
-                }
-              </span>
-            </td>
+            <div class="inventory-info">
 
-          </tr>
+              <div class="inventory-top">
 
-        `).join("")}
+                <span class="inventory-category">
+                  ${escapeHtml(product.category)}
+                </span>
 
-      </tbody>
+                <span class="
+                  inventory-status
+                  ${product.active ? "active" : "hidden-status"}
+                ">
+                  ${product.active ? "ACTIVE" : "HIDDEN"}
+                </span>
 
-    </table>
+              </div>
+
+              <h3>
+                ${escapeHtml(product.name)}
+              </h3>
+
+              <p>
+                ${escapeHtml(product.description || "No description")}
+              </p>
+
+              <div class="inventory-meta">
+
+                <strong>
+                  ${
+                    product.price === null ||
+                    product.price === undefined
+                      ? "Contact for price"
+                      : Number(product.price).toLocaleString() + " XOF"
+                  }
+                </strong>
+
+                <span>
+                  ${
+                    Number(product.stock) > 0
+                      ? `${product.stock} in stock`
+                      : "Out of stock"
+                  }
+                </span>
+
+              </div>
+
+              <small>
+                ID: ${escapeHtml(product.id)}
+              </small>
+
+              <div class="inventory-actions">
+
+                <button
+                  type="button"
+                  onclick="editProduct('${escapeHtml(product.id)}')"
+                >
+                  ✏️ Edit
+                </button>
+
+                <button
+                  type="button"
+                  onclick="toggleProduct('${escapeHtml(product.id)}', ${product.active})"
+                >
+                  ${
+                    product.active
+                      ? "Hide"
+                      : "Show"
+                  }
+                </button>
+
+                <button
+                  type="button"
+                  class="danger"
+                  onclick="deleteProduct('${escapeHtml(product.id)}')"
+                >
+                  🗑 Delete
+                </button>
+
+              </div>
+
+            </div>
+
+          </article>
+
+        `).join("")
+
+        : `
+          <div class="empty-inventory">
+            <strong>No products yet.</strong>
+            <p>Add your first machine part.</p>
+          </div>
+        `
+      }
+
+    </div>
 
   `;
 
 }
+
+
+window.editProduct =
+async function(id) {
+
+  const response =
+    await api("/api/admin/products");
+
+  const products =
+    await response.json();
+
+  const product =
+    products.find(item => item.id === id);
+
+  if (!product) {
+    alert("Product not found.");
+    return;
+  }
+
+  const name =
+    prompt(
+      "Product name:",
+      product.name || ""
+    );
+
+  if (name === null) return;
+
+  const category =
+    prompt(
+      "Category:",
+      product.category || ""
+    );
+
+  if (category === null) return;
+
+  const description =
+    prompt(
+      "Description:",
+      product.description || ""
+    );
+
+  if (description === null) return;
+
+  const price =
+    prompt(
+      "Price in XOF:",
+      product.price ?? ""
+    );
+
+  if (price === null) return;
+
+  const stock =
+    prompt(
+      "Stock quantity:",
+      product.stock ?? 0
+    );
+
+  if (stock === null) return;
+
+  const response2 =
+    await api(
+      `/api/admin/products/${encodeURIComponent(id)}`,
+      {
+        method: "PUT",
+
+        body: JSON.stringify({
+          name,
+          category,
+          description,
+          price:
+            price.trim() === ""
+              ? null
+              : Number(price),
+          stock:
+            Number(stock)
+        })
+      }
+    );
+
+  const data =
+    await response2.json();
+
+  if (!response2.ok) {
+    alert(
+      data.error ||
+      "Could not update product."
+    );
+    return;
+  }
+
+  alert("Product updated successfully.");
+
+  loadProducts();
+  loadStats();
+
+};
+
+
+window.toggleProduct =
+async function(id, active) {
+
+  const response =
+    await api(
+      `/api/admin/products/${encodeURIComponent(id)}`,
+      {
+        method: "PUT",
+
+        body: JSON.stringify({
+          active: !active
+        })
+      }
+    );
+
+  const data =
+    await response.json();
+
+  if (!response.ok) {
+    alert(
+      data.error ||
+      "Could not change product status."
+    );
+    return;
+  }
+
+  loadProducts();
+  loadStats();
+
+};
+
+
+window.deleteProduct =
+async function(id) {
+
+  if (
+    !confirm(
+      "Hide this product from the public store?"
+    )
+  ) {
+    return;
+  }
+
+  const response =
+    await api(
+      `/api/admin/products/${encodeURIComponent(id)}`,
+      {
+        method: "DELETE"
+      }
+    );
+
+  const data =
+    await response.json();
+
+  if (!response.ok) {
+    alert(
+      data.error ||
+      "Could not remove product."
+    );
+    return;
+  }
+
+  loadProducts();
+  loadStats();
+
+};
 
 
 async function loadOrders() {

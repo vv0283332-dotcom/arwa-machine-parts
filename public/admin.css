@@ -314,3 +314,161 @@ th {
   }
 
 }
+
+/* ARWA INVENTORY */
+
+.inventory-toolbar {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  margin-bottom:20px;
+}
+
+.inventory-grid {
+  display:grid;
+  grid-template-columns:
+    repeat(auto-fill, minmax(280px, 1fr));
+  gap:18px;
+}
+
+.inventory-card {
+  overflow:hidden;
+  border:1px solid #28313a;
+  border-radius:16px;
+  background:#11151a;
+}
+
+.inventory-image {
+  height:210px;
+  display:grid;
+  place-items:center;
+  background:#090b0d;
+  overflow:hidden;
+}
+
+.inventory-image img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.inventory-image span {
+  font-size:60px;
+  opacity:.35;
+}
+
+.inventory-info {
+  padding:18px;
+}
+
+.inventory-top {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+
+.inventory-category {
+  color:#f4b73f;
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+}
+
+.inventory-status {
+  padding:5px 8px;
+  border-radius:20px;
+  font-size:10px;
+  font-weight:900;
+}
+
+.inventory-status.active {
+  background:#18351f;
+  color:#70d98b;
+}
+
+.inventory-status.hidden-status {
+  background:#332b20;
+  color:#f4b73f;
+}
+
+.inventory-info h3 {
+  margin:12px 0 8px;
+  font-size:20px;
+}
+
+.inventory-info p {
+  color:#9aa3ad;
+  line-height:1.5;
+  min-height:45px;
+}
+
+.inventory-meta {
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  margin:18px 0 8px;
+}
+
+.inventory-meta strong {
+  color:#f4b73f;
+}
+
+.inventory-meta span {
+  color:#9aa3ad;
+  font-size:13px;
+}
+
+.inventory-info small {
+  color:#65717c;
+}
+
+.inventory-actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:16px;
+}
+
+.inventory-actions button {
+  border:1px solid #28313a;
+  background:#181e24;
+  color:#f5f6f7;
+  padding:9px 12px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.inventory-actions button:hover {
+  border-color:#f4b73f;
+}
+
+.inventory-actions .danger {
+  color:#ff8b8b;
+}
+
+.empty-inventory {
+  padding:50px 20px;
+  text-align:center;
+  color:#9aa3ad;
+}
+
+@media (max-width:600px) {
+
+  .inventory-grid {
+    grid-template-columns:1fr;
+  }
+
+  .inventory-image {
+    height:190px;
+  }
+
+  .inventory-meta {
+    flex-direction:column;
+  }
+
+}
+
