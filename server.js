@@ -227,6 +227,7 @@ app.get(
 app.post(
   "/api/admin/products",
   authenticate,
+  imageUpload.single("image"),
   (req, res) => {
 
     const {
@@ -254,7 +255,8 @@ app.post(
           .toString(36)
           .toUpperCase(),
 
-      name: String(name).trim(),
+      name:
+        String(name).trim(),
 
       category:
         String(category).trim(),
@@ -273,6 +275,11 @@ app.post(
         Number.isFinite(Number(stock))
           ? Number(stock)
           : 0,
+
+      image:
+        req.file
+          ? "/uploads/" + req.file.filename
+          : "",
 
       active: true
     };

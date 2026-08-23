@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "id": "PMT63E2PX",
+    "name": "battery",
+    "category": "cd110",
+    "description": "available",
+    "price": 3800,
+    "stock": 0,
+    "active": true
+  }
+]

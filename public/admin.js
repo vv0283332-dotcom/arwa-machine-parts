@@ -842,31 +842,69 @@ $("#productForm")
 
       event.preventDefault();
 
-      await api(
-        "/api/admin/products",
-        {
-          method:"POST",
+      const formData =
+        new FormData();
 
-          body:JSON.stringify({
+      const image =
+        $("#productImage").files[0];
 
-            name:
-              $("#productName").value,
+      if (image) {
+        formData.append(
+          "image",
+          image
+        );
+      }
 
-            category:
-              $("#productCategory").value,
-
-            description:
-              $("#productDescription").value,
-
-            price:
-              $("#productPrice").value,
-
-            stock:
-              $("#productStock").value
-
-          })
-        }
+      formData.append(
+        "name",
+        $("#productName").value.trim()
       );
+
+      formData.append(
+        "category",
+        $("#productCategory").value.trim()
+      );
+
+      formData.append(
+        "description",
+        $("#productDescription").value.trim()
+      );
+
+      formData.append(
+        "price",
+        $("#productPrice").value.trim()
+      );
+
+      formData.append(
+        "stock",
+        $("#productStock").value
+      );
+
+      const response =
+        await fetch(
+          "/api/admin/products",
+          {
+            method: "POST",
+
+            headers: {
+              "Authorization":
+                `Bearer ${token}`
+            },
+
+            body: formData
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        alert(
+          data.error ||
+          "Could not create product."
+        );
+        return;
+      }
 
       $("#productForm").reset();
 
@@ -877,8 +915,12 @@ $("#productForm")
       loadProducts();
       loadStats();
 
+      alert(
+        "Product created successfully."
+      );
     }
   );
+
 
 
 document

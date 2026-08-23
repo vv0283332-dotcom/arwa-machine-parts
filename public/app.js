@@ -1,4 +1,23 @@
-const products = [];
+let products = [];
+
+async function loadProducts() {
+  try {
+    const response = await fetch("/api/products", {
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to load products");
+    }
+
+    products = await response.json();
+    renderProducts();
+  } catch (error) {
+    console.error("Could not load products:", error);
+    products = [];
+    renderProducts();
+  }
+}
 
 
 let cart =
@@ -125,7 +144,15 @@ function renderProducts() {
         <article class="product">
 
           <div class="product-image">
-            ${product.icon}
+            ${
+              product.image
+                ? `<img
+                    src="${product.image}"
+                    alt="${product.name}"
+                    loading="lazy"
+                  >`
+                : "⚙"
+            }
           </div>
 
           <div class="product-body">
@@ -144,7 +171,7 @@ function renderProducts() {
 
             <button
               class="button primary"
-              onclick="addToCart(${product.id})"
+              onclick="addToCart('${product.id}')""
             >
               Add to order
             </button>
@@ -404,5 +431,5 @@ $("#year").textContent =
   new Date().getFullYear();
 
 
-renderProducts();
+loadProducts();
 renderCart();
