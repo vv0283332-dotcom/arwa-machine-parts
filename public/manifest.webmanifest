@@ -1,0 +1,9 @@
+{
+  "name": "ARWA Machine Parts",
+  "short_name": "ARWA",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090b0d",
+  "theme_color": "#0b0d10",
+  "description": "ARWA Machine Parts — Cotonou, Benin"
+}

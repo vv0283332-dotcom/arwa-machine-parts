@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090b0d">
+<title>ARWA Admin</title>
+<link rel="stylesheet" href="/admin.css">
+</head>
+
+<body>
+
+<div id="loginScreen" class="login">
+
+  <div class="login-card">
+
+    <div class="brand">
+      <span>A</span>
+      ARWA
+    </div>
+
+    <h1>Admin Dashboard</h1>
+
+    <p>Manage the ARWA machine-parts business.</p>
+
+    <form id="loginForm">
+
+      <input
+        id="username"
+        placeholder="Username"
+        autocomplete="username"
+        required
+      >
+
+      <input
+        id="password"
+        type="password"
+        placeholder="Password"
+        autocomplete="current-password"
+        required
+      >
+
+      <button>
+        Sign in
+      </button>
+
+    </form>
+
+    <div id="loginError"></div>
+
+  </div>
+
+</div>
+
+
+<div id="dashboard" class="dashboard hidden">
+
+  <aside class="sidebar">
+
+    <div class="brand">
+      <span>A</span>
+      ARWA
+    </div>
+
+    <button data-page="overview">
+      Dashboard
+    </button>
+
+    <button data-page="products">
+      Products
+    </button>
+
+    <button data-page="orders">
+      Orders
+    </button>
+
+    <button data-page="posts">
+      Posts
+    </button>
+
+    <button data-page="subscribers">
+      Subscribers
+    </button>
+
+    <button id="logout">
+      Logout
+    </button>
+
+  </aside>
+
+
+  <main class="content">
+
+    <header>
+
+      <div>
+        <small>ARWA ADMIN</small>
+        <h1 id="pageTitle">
+          Dashboard
+        </h1>
+      </div>
+
+      <a href="/" target="_blank">
+        View store →
+      </a>
+
+    </header>
+
+
+    <section id="overviewPage" class="page">
+
+      <div class="stats">
+
+        <article>
+          <span>Products</span>
+          <strong id="statProducts">0</strong>
+        </article>
+
+        <article>
+          <span>Total orders</span>
+          <strong id="statOrders">0</strong>
+        </article>
+
+        <article>
+          <span>New orders</span>
+          <strong id="statNew">0</strong>
+        </article>
+
+        <article>
+          <span>Subscribers</span>
+          <strong id="statSubscribers">0</strong>
+        </article>
+
+      </div>
+
+      <div class="panel">
+
+        <h2>ARWA control center</h2>
+
+        <p>
+          Manage your products, customer orders,
+          announcements and subscribers from here.
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <section id="productsPage" class="page hidden">
+
+      <div class="panel">
+
+        <div class="panel-head">
+          <h2>Products</h2>
+          <button id="addProduct">
+            + Add product
+          </button>
+        </div>
+
+        <div id="productsTable"></div>
+
+      </div>
+
+    </section>
+
+
+    <section id="ordersPage" class="page hidden">
+
+      <div class="panel">
+
+        <div class="panel-head">
+          <h2>Orders</h2>
+          <button onclick="loadOrders()">
+            Refresh
+          </button>
+        </div>
+
+        <div id="ordersTable"></div>
+
+      </div>
+
+    </section>
+
+
+    <section id="postsPage" class="page hidden">
+
+      <div class="panel">
+
+        <h2>Create post</h2>
+
+        <form id="postForm" enctype="multipart/form-data">
+
+          <label>Product picture</label>
+
+          <input
+            id="postImage"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+          >
+
+          <label>Product / post title</label>
+
+          <input
+            id="postTitle"
+            placeholder="Example: CAT Hydraulic Pump"
+            required
+          >
+
+          <label>Category</label>
+
+          <input
+            id="postCategory"
+            placeholder="Hydraulic"
+          >
+
+          <label>Price</label>
+
+          <input
+            id="postPrice"
+            placeholder="Contact for price"
+          >
+
+          <label>Description</label>
+
+          <textarea
+            id="postContent"
+            placeholder="Write about this product..."
+            required
+          ></textarea>
+
+          <button>
+            Publish product post
+          </button>
+
+        </form>
+
+      </div>
+
+      <div class="panel">
+
+        <h2>Published posts</h2>
+
+        <div id="postsList"></div>
+
+      </div>
+
+    </section>
+
+
+    <section id="subscribersPage" class="page hidden">
+
+      <div class="panel">
+
+        <h2>Subscribers</h2>
+
+        <div id="subscribersTable"></div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+
+<div id="modal" class="modal hidden">
+
+  <div class="modal-card">
+
+    <button id="closeModal">×</button>
+
+    <h2>Add product</h2>
+
+    <form id="productForm">
+
+      <input
+        id="productName"
+        placeholder="Product name"
+        required
+      >
+
+      <input
+        id="productCategory"
+        placeholder="Category"
+        required
+      >
+
+      <textarea
+        id="productDescription"
+        placeholder="Description"
+      ></textarea>
+
+      <input
+        id="productPrice"
+        type="number"
+        step="0.01"
+        placeholder="Price (optional)"
+      >
+
+      <input
+        id="productStock"
+        type="number"
+        min="0"
+        value="0"
+        placeholder="Stock"
+      >
+
+      <button>
+        Create product
+      </button>
+
+    </form>
+
+  </div>
+
+</div>
+
+<script src="/admin.js"></script>
+
+</body>
+</html>
