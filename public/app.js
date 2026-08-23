@@ -106,11 +106,158 @@ function changeQuantity(id, amount) {
 }
 
 
+function formatPrice(price) {
+  const value = Number(price);
+
+  if (!Number.isFinite(value)) {
+    return "Price on request";
+  }
+
+  return new Intl.NumberFormat("fr-FR", {
+    maximumFractionDigits: 0
+  }).format(value) + " XOF";
+}
+
+
+function productAvailability(product) {
+  const stock = Number(product.stock);
+
+  if (Number.isFinite(stock) && stock > 0) {
+    return {
+      label: `${stock} in stock`,
+      className: "in-stock"
+    };
+  }
+
+  return {
+    label: "Check availability",
+    className: "on-request"
+  };
+}
+
+
+function productWhatsApp(product) {
+  const message =
+    `Hello ARWA, I am interested in this machine part:%0A%0A` +
+    `Product: ${product.name}%0A` +
+    `Category: ${product.category}%0A` +
+    `Price: ${formatPrice(product.price)}%0A%0A` +
+    `Please confirm availability.`;
+
+  return `https://wa.me/22962347899?text=${message}`;
+}
+
+
+function openProductDetails(id) {
+
+  const product =
+    products.find(
+      item => String(item.id) === String(id)
+    );
+
+  if (!product) return;
+
+  const availability =
+    productAvailability(product);
+
+  const modal =
+    document.createElement("div");
+
+  modal.className =
+    "product-modal";
+
+  modal.innerHTML = `
+    <div class="product-modal-backdrop"
+         onclick="this.parentElement.remove()"></div>
+
+    <div class="product-modal-card">
+
+      <button
+        class="product-modal-close"
+        onclick="this.closest('.product-modal').remove()"
+        aria-label="Close"
+      >
+        ×
+      </button>
+
+      <div class="product-detail-image">
+
+        ${
+          product.image
+            ? `
+              <img
+                src="${product.image}"
+                alt="${product.name}"
+              >
+            `
+            : `
+              <div class="product-placeholder-large">
+                ⚙
+              </div>
+            `
+        }
+
+      </div>
+
+      <div class="product-detail-content">
+
+        <span class="category-badge">
+          ${product.category}
+        </span>
+
+        <h2>
+          ${product.name}
+        </h2>
+
+        <p class="product-detail-description">
+          ${
+            product.description ||
+            "Contact ARWA for product specifications and availability."
+          }
+        </p>
+
+        <div class="product-detail-price">
+          ${formatPrice(product.price)}
+        </div>
+
+        <div class="availability ${availability.className}">
+          <span></span>
+          ${availability.label}
+        </div>
+
+        <div class="product-detail-actions">
+
+          <a
+            href="${productWhatsApp(product)}"
+            target="_blank"
+            rel="noopener"
+            class="button primary"
+          >
+            WhatsApp to order
+          </a>
+
+          <button
+            class="button secondary"
+            onclick="this.closest('.product-modal').remove()"
+          >
+            Close
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+}
+
+
 function renderProducts() {
 
   const search =
-    $("#searchInput")
-      .value
+    $("#searchInput").value
       .trim()
       .toLowerCase();
 
@@ -120,16 +267,20 @@ function renderProducts() {
   const filtered =
     products.filter(product => {
 
-      const matchesSearch =
+      const text =
         `${product.name || ""} ${product.description || ""} ${product.category || ""}`
-          .toLowerCase()
-          .includes(search);
+          .toLowerCase();
+
+      const matchesSearch =
+        text.includes(search);
 
       const matchesCategory =
         category === "all" ||
         product.category === category;
 
-      return matchesSearch && matchesCategory;
+      return matchesSearch &&
+        matchesCategory;
+
     });
 
 
@@ -138,51 +289,54 @@ function renderProducts() {
 
       ? filtered.map(product => {
 
-          const price =
-            product.price !== null &&
-            product.price !== undefined &&
-            product.price !== ""
-              ? `${Number(product.price).toLocaleString()} FCFA`
-              : "Price on request";
-
-          const available =
-            Number(product.stock) > 0 ||
-            product.stock === undefined
-              ? "Available"
-              : "Contact ARWA";
-
-          const image =
-            product.image
-              ? `
-                <img
-                  src="${product.image}"
-                  alt="${product.name}"
-                  loading="lazy"
-                >
-              `
-              : `
-                <div class="product-placeholder">
-                  ⚙
-                </div>
-              `;
-
-          const message =
-            encodeURIComponent(
-              `Hello ARWA, I am interested in ${product.name}${product.category ? ` (${product.category})` : ""}.`
-            );
+          const availability =
+            productAvailability(product);
 
           return `
+            <article
+              class="product-card"
+              onclick="openProductDetails('${String(product.id).replace(/'/g, "\'")}')"
+            >
 
-            <article class="product">
+              <div class="product-photo">
 
-              <div class="product-image">
-                ${image}
+                ${
+                  product.image
+                    ? `
+                      <img
+                        src="${product.image}"
+                        alt="${product.name}"
+                        loading="lazy"
+                      >
+                    `
+                    : `
+                      <div class="product-placeholder">
+                        <span>ARWA</span>
+                        <strong>⚙</strong>
+                        <small>MACHINE PARTS</small>
+                      </div>
+                    `
+                }
+
+                <span class="category-badge product-category-badge">
+                  ${product.category}
+                </span>
+
+                <span class="availability ${availability.className}">
+                  <span></span>
+                  ${availability.label}
+                </span>
+
               </div>
 
-              <div class="product-body">
+              <div class="product-card-body">
 
-                <div class="product-category">
-                  ${product.category || "Machine Parts"}
+                <div class="product-card-top">
+
+                  <span>
+                    ARWA MACHINE PARTS
+                  </span>
+
                 </div>
 
                 <h3>
@@ -190,66 +344,55 @@ function renderProducts() {
                 </h3>
 
                 <p>
-                  ${product.description || "Contact ARWA for more information about this part."}
+                  ${
+                    product.description ||
+                    "Quality machine part supplied by ARWA."
+                  }
                 </p>
 
-                <div class="product-meta">
+                <div class="product-card-footer">
 
                   <strong class="product-price">
-                    ${price}
+                    ${formatPrice(product.price)}
                   </strong>
 
-                  <span class="product-stock">
-                    ${available}
+                  <span class="view-product">
+                    View details →
                   </span>
 
                 </div>
 
-                <div class="product-actions">
-
-                  <button
-                    class="button primary"
-                    onclick="addToCart('${product.id}')"
-                  >
-                    Add to order
-                  </button>
-
-                  <a
-                    class="button secondary"
-                    href="https://wa.me/22962347899?text=${message}"
-                    target="_blank"
-                  >
-                    WhatsApp
-                  </a>
-
-                </div>
+                <a
+                  href="${productWhatsApp(product)}"
+                  target="_blank"
+                  rel="noopener"
+                  class="product-whatsapp"
+                  onclick="event.stopPropagation()"
+                >
+                  WhatsApp order
+                </a>
 
               </div>
 
             </article>
-
           `;
+
         }).join("")
 
       : `
         <div class="empty-products">
 
-          <strong>
-            No parts available
-          </strong>
+          <div class="empty-products-icon">
+            ⚙
+          </div>
+
+          <h3>
+            No parts found
+          </h3>
 
           <p>
-            ARWA is currently updating its catalog.
-            Contact us directly for the part you need.
+            Try another search or category.
           </p>
-
-          <a
-            class="button primary"
-            href="https://wa.me/22962347899"
-            target="_blank"
-          >
-            Contact ARWA
-          </a>
 
         </div>
       `;
@@ -494,6 +637,57 @@ $("#menuButton")
 
 $("#year").textContent =
   new Date().getFullYear();
+
+
+function updateCategoryFilter() {
+
+  const select =
+    $("#categorySelect");
+
+  if (!select) return;
+
+  const current =
+    select.value;
+
+  const categories =
+    [...new Set(
+      products
+        .map(product => String(product.category || "").trim())
+        .filter(Boolean)
+    )]
+      .sort((a, b) =>
+        a.localeCompare(b)
+      );
+
+  select.innerHTML = `
+    <option value="all">
+      All categories
+    </option>
+
+    ${categories.map(category => `
+      <option value="${category}">
+        ${category}
+      </option>
+    `).join("")}
+  `;
+
+  if (
+    categories.includes(current)
+  ) {
+    select.value = current;
+  }
+}
+
+
+const originalLoadProducts =
+  loadProducts;
+
+loadProducts = async function() {
+
+  await originalLoadProducts();
+
+  updateCategoryFilter();
+};
 
 
 loadProducts();
