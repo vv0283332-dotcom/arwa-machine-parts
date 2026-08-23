@@ -1128,3 +1128,52 @@ footer strong {
   }
 
 }
+
+/* ARWA INVENTORY STATUS */
+
+.availability.out-of-stock {
+  background: rgba(150, 30, 30, 0.92);
+  color: #fff;
+}
+
+.availability.out-of-stock span {
+  background: #fff;
+}
+
+.product-disabled {
+  opacity: .55;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+.product-whatsapp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+}
+
+@media (max-width: 600px) {
+  .product-card {
+    border-radius: 16px;
+  }
+
+  .product-card-body {
+    padding: 16px;
+  }
+
+  .product-card-footer {
+    gap: 10px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .product-price {
+    font-size: 20px;
+  }
+
+  .product-whatsapp {
+    width: 100%;
+  }
+}
+

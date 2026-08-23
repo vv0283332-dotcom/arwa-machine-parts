@@ -978,13 +978,13 @@ $("#postForm")
       const formData =
         new FormData();
 
-      const image =
-        $("#postImage").files[0];
+      const media =
+        $("#postMedia").files[0];
 
-      if (image) {
+      if (media) {
         formData.append(
-          "image",
-          image
+          "media",
+          media
         );
       }
 

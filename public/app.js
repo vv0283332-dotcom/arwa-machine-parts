@@ -58,28 +58,47 @@ function showToast(message) {
 
 function addToCart(id) {
 
+  const product =
+    products.find(
+      item => String(item.id) === String(id)
+    );
+
+  if (!product) {
+    showToast("Product not found.");
+    return;
+  }
+
+  const stock = Number(product.stock);
+
+  if (!Number.isFinite(stock) || stock <= 0) {
+    showToast("This part is currently out of stock.");
+    return;
+  }
+
   const existing =
     cart.find(item => item.id === id);
 
+  const currentQuantity =
+    existing ? Number(existing.quantity) : 0;
+
+  if (currentQuantity >= stock) {
+    showToast(`Only ${stock} available.`);
+    return;
+  }
+
   if (existing) {
-
     existing.quantity++;
-
   } else {
-
     cart.push({
       id,
       quantity: 1
     });
-
   }
 
   saveCart();
-
   renderCart();
 
   showToast("Part added to your order.");
-
 }
 
 
@@ -125,13 +144,15 @@ function productAvailability(product) {
   if (Number.isFinite(stock) && stock > 0) {
     return {
       label: `${stock} in stock`,
-      className: "in-stock"
+      className: "in-stock",
+      available: true
     };
   }
 
   return {
-    label: "Check availability",
-    className: "on-request"
+    label: "OUT OF STOCK",
+    className: "out-of-stock",
+    available: false
   };
 }
 
@@ -362,15 +383,30 @@ function renderProducts() {
 
                 </div>
 
-                <a
-                  href="${productWhatsApp(product)}"
-                  target="_blank"
-                  rel="noopener"
-                  class="product-whatsapp"
-                  onclick="event.stopPropagation()"
-                >
-                  WhatsApp order
-                </a>
+                ${
+                  availability.available
+                    ? `
+                      <a
+                        href="${productWhatsApp(product)}"
+                        target="_blank"
+                        rel="noopener"
+                        class="product-whatsapp"
+                        onclick="event.stopPropagation()"
+                      >
+                        WhatsApp order
+                      </a>
+                    `
+                    : `
+                      <button
+                        type="button"
+                        class="product-whatsapp product-disabled"
+                        disabled
+                        onclick="event.stopPropagation()"
+                      >
+                        Out of stock
+                      </button>
+                    `
+                }
 
               </div>
 

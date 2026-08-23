@@ -66,6 +66,91 @@ const storage = multer.diskStorage({
   }
 });
 
+const mediaStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+
+    const allowedImages = [
+      ".jpg",
+      ".jpeg",
+      ".png",
+      ".webp",
+      ".gif"
+    ];
+
+    const allowedVideos = [
+      ".mp4",
+      ".webm",
+      ".mov"
+    ];
+
+    const allowed = [
+      ...allowedImages,
+      ...allowedVideos
+    ];
+
+    const safeExt = allowed.includes(ext)
+      ? ext
+      : "";
+
+    if (!safeExt) {
+      return cb(
+        new Error("Unsupported media type.")
+      );
+    }
+
+    cb(
+      null,
+      "arwa-" +
+      Date.now() +
+      "-" +
+      Math.random().toString(36).slice(2, 8) +
+      safeExt
+    );
+  }
+});
+
+const mediaUpload = multer({
+  storage: mediaStorage,
+
+  limits: {
+    fileSize: 100 * 1024 * 1024
+  },
+
+  fileFilter: (req, file, cb) => {
+
+    const images = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/gif"
+    ];
+
+    const videos = [
+      "video/mp4",
+      "video/webm",
+      "video/quicktime"
+    ];
+
+    if (
+      images.includes(file.mimetype) ||
+      videos.includes(file.mimetype)
+    ) {
+      cb(null, true);
+    } else {
+      cb(
+        new Error(
+          "Only JPG, PNG, WEBP, GIF, MP4, WEBM and MOV videos are allowed."
+        )
+      );
+    }
+  }
+});
+
 const imageUpload = multer({
   storage,
 
@@ -84,7 +169,11 @@ const imageUpload = multer({
     if (allowed.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Only JPG, PNG, WEBP and GIF images are allowed."));
+      cb(
+        new Error(
+          "Only JPG, PNG, WEBP and GIF images are allowed."
+        )
+      );
     }
   }
 });
@@ -277,7 +366,14 @@ app.post(
           : 0,
 
       image:
-        req.file
+        req.file &&
+        req.file.mimetype.startsWith("image/")
+          ? "/uploads/" + req.file.filename
+          : "",
+
+      video:
+        req.file &&
+        req.file.mimetype.startsWith("video/")
           ? "/uploads/" + req.file.filename
           : "",
 
@@ -485,7 +581,7 @@ app.get("/api/posts", (req, res) => {
 app.post(
   "/api/admin/posts",
   authenticate,
-  imageUpload.single("image"),
+  mediaUpload.single("media"),
   (req, res) => {
 
     const {

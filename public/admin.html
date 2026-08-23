@@ -191,13 +191,18 @@
 
         <form id="postForm" enctype="multipart/form-data">
 
-          <label>Product picture</label>
+          <label>Product image or video</label>
 
           <input
-            id="postImage"
+            id="postMedia"
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
+            accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"
           >
+
+          <small class="media-help">
+            Upload a product photo or a short MP4/WebM/MOV video.
+            Maximum size: 100 MB.
+          </small>
 
           <label>Product / post title</label>
 
