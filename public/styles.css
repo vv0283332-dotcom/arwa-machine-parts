@@ -438,3 +438,93 @@ footer strong {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--gold);
 }
+
+/* =========================
+   ARWA PRODUCT SHOWROOM
+========================= */
+
+.product-placeholder {
+  font-size: 78px;
+  color: var(--gold-dark);
+}
+
+.product-meta {
+  margin: 18px 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding-top: 15px;
+
+  border-top: 1px solid var(--line);
+}
+
+.product-price {
+  color: var(--navy);
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 17px;
+}
+
+.product-stock {
+  color: var(--gold-dark);
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.product-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.product-actions .button {
+  width: 100%;
+  padding: 11px 8px;
+  font-size: 12px;
+}
+
+.empty-products {
+  grid-column: 1 / -1;
+
+  padding: 70px 30px;
+
+  text-align: center;
+
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+
+.empty-products strong {
+  display: block;
+
+  color: var(--navy);
+
+  font-size: 30px;
+}
+
+.empty-products p {
+  max-width: 500px;
+
+  margin: 12px auto 25px;
+
+  color: var(--muted);
+
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.7;
+}
+
+@media (max-width: 560px) {
+
+  .product-actions {
+    grid-template-columns: 1fr;
+  }
+
+}

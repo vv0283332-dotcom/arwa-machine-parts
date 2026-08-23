@@ -117,12 +117,11 @@ function renderProducts() {
   const category =
     $("#categorySelect").value;
 
-
   const filtered =
     products.filter(product => {
 
       const matchesSearch =
-        `${product.name} ${product.description}`
+        `${product.name || ""} ${product.description || ""} ${product.category || ""}`
           .toLowerCase()
           .includes(search);
 
@@ -130,64 +129,130 @@ function renderProducts() {
         category === "all" ||
         product.category === category;
 
-      return matchesSearch &&
-        matchesCategory;
-
+      return matchesSearch && matchesCategory;
     });
 
 
   $("#productsGrid").innerHTML =
     filtered.length
 
-      ? filtered.map(product => `
+      ? filtered.map(product => {
 
-        <article class="product">
+          const price =
+            product.price !== null &&
+            product.price !== undefined &&
+            product.price !== ""
+              ? `${Number(product.price).toLocaleString()} FCFA`
+              : "Price on request";
 
-          <div class="product-image">
-            ${
-              product.image
-                ? `<img
-                    src="${product.image}"
-                    alt="${product.name}"
-                    loading="lazy"
-                  >`
-                : "⚙"
-            }
-          </div>
+          const available =
+            Number(product.stock) > 0 ||
+            product.stock === undefined
+              ? "Available"
+              : "Contact ARWA";
 
-          <div class="product-body">
+          const image =
+            product.image
+              ? `
+                <img
+                  src="${product.image}"
+                  alt="${product.name}"
+                  loading="lazy"
+                >
+              `
+              : `
+                <div class="product-placeholder">
+                  ⚙
+                </div>
+              `;
 
-            <div class="product-category">
-              ${product.category}
-            </div>
+          const message =
+            encodeURIComponent(
+              `Hello ARWA, I am interested in ${product.name}${product.category ? ` (${product.category})` : ""}.`
+            );
 
-            <h3>
-              ${product.name}
-            </h3>
+          return `
 
-            <p>
-              ${product.description}
-            </p>
+            <article class="product">
 
-            <button
-              class="button primary"
-              onclick="addToCart('${product.id}')""
-            >
-              Add to order
-            </button>
+              <div class="product-image">
+                ${image}
+              </div>
 
-          </div>
+              <div class="product-body">
 
-        </article>
+                <div class="product-category">
+                  ${product.category || "Machine Parts"}
+                </div>
 
-      `).join("")
+                <h3>
+                  ${product.name}
+                </h3>
+
+                <p>
+                  ${product.description || "Contact ARWA for more information about this part."}
+                </p>
+
+                <div class="product-meta">
+
+                  <strong class="product-price">
+                    ${price}
+                  </strong>
+
+                  <span class="product-stock">
+                    ${available}
+                  </span>
+
+                </div>
+
+                <div class="product-actions">
+
+                  <button
+                    class="button primary"
+                    onclick="addToCart('${product.id}')"
+                  >
+                    Add to order
+                  </button>
+
+                  <a
+                    class="button secondary"
+                    href="https://wa.me/22962347899?text=${message}"
+                    target="_blank"
+                  >
+                    WhatsApp
+                  </a>
+
+                </div>
+
+              </div>
+
+            </article>
+
+          `;
+        }).join("")
 
       : `
-        <p style="color:#9aa3ad">
-          No matching parts found.
-        </p>
-      `;
+        <div class="empty-products">
 
+          <strong>
+            No parts available
+          </strong>
+
+          <p>
+            ARWA is currently updating its catalog.
+            Contact us directly for the part you need.
+          </p>
+
+          <a
+            class="button primary"
+            href="https://wa.me/22962347899"
+            target="_blank"
+          >
+            Contact ARWA
+          </a>
+
+        </div>
+      `;
 }
 
 
