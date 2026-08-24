@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import multer from "multer";
 import { fileURLToPath } from "node:url";
+import { securityAlert } from "./security-monitor.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -212,6 +213,143 @@ app.use(express.json({ limit: "1mb" }));
 app.use(express.static(
   path.join(__dirname, "public")
 ));
+
+/* SECURITY MONITORING */
+
+const failedLogins = new Map();
+
+function clientIp(req) {
+  return (
+    req.headers["cf-connecting-ip"] ||
+    req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
+    req.ip ||
+    "unknown"
+  );
+}
+
+/*
+ * Detect repeated failed admin logins.
+ */
+app.use("/api/admin/login", async (req, res, next) => {
+  if (req.method !== "POST") {
+    return next();
+  }
+
+  const originalJson = res.json.bind(res);
+
+  res.json = async (body) => {
+    if (res.statusCode === 401) {
+      const ip = clientIp(req);
+
+      const record = failedLogins.get(ip) || {
+        count: 0,
+        first: Date.now()
+      };
+
+      record.count++;
+      failedLogins.set(ip, record);
+
+      if (record.count === 3 || record.count === 5 || record.count >= 10) {
+        await securityAlert({
+          type:
+            record.count >= 10
+              ? "POSSIBLE_BRUTE_FORCE"
+              : "FAILED_ADMIN_LOGIN",
+          req,
+          details: {
+            attempts: record.count,
+            username: req.body?.username || "unknown"
+          }
+        });
+      }
+    }
+
+    return originalJson(body);
+  };
+
+  next();
+});
+
+/*
+ * Watch suspicious paths commonly probed by scanners.
+ */
+app.use(async (req, res, next) => {
+  const suspiciousPatterns = [
+    "/wp-admin",
+    "/wp-login.php",
+    "/phpmyadmin",
+    "/.env",
+    "/config.php",
+    "/shell",
+    "/cmd",
+    "/cgi-bin",
+    "/server-status",
+    "/actuator",
+    "/vendor/phpunit"
+  ];
+
+  const pathname = req.path.toLowerCase();
+
+  if (
+    suspiciousPatterns.some(
+      pattern => pathname === pattern || pathname.startsWith(pattern + "/")
+    )
+  ) {
+    await securityAlert({
+      type: "SUSPICIOUS_PATH_SCAN",
+      req,
+      details: {
+        matchedPath: pathname
+      }
+    });
+  }
+
+  next();
+});
+
+/*
+ * Watch repeated 404 probing.
+ */
+const notFoundAttempts = new Map();
+
+app.use(async (req, res, next) => {
+  const originalStatus = res.status.bind(res);
+
+  res.status = function(code) {
+    if (code === 404) {
+      const ip = clientIp(req);
+      const now = Date.now();
+
+      const record = notFoundAttempts.get(ip) || {
+        count: 0,
+        window: now
+      };
+
+      if (now - record.window > 5 * 60 * 1000) {
+        record.count = 0;
+        record.window = now;
+      }
+
+      record.count++;
+      notFoundAttempts.set(ip, record);
+
+      if (record.count === 10 || record.count === 25) {
+        securityAlert({
+          type: "EXCESSIVE_404_PROBING",
+          req,
+          details: {
+            attempts: record.count
+          }
+        }).catch(() => {});
+      }
+    }
+
+    return originalStatus(code);
+  };
+
+  next();
+});
+
 
 function authenticate(req, res, next) {
   const header = req.headers.authorization || "";
@@ -797,6 +935,34 @@ app.get(
       read(files.subscribers)
     );
 
+  }
+);
+
+
+/* SECURITY EVENTS */
+
+app.get(
+  "/api/admin/security-events",
+  authenticate,
+  (req, res) => {
+    const file = path.join(
+      dataDir,
+      "security-events.json"
+    );
+
+    if (!fs.existsSync(file)) {
+      return res.json([]);
+    }
+
+    try {
+      res.json(
+        JSON.parse(
+          fs.readFileSync(file, "utf8")
+        )
+      );
+    } catch {
+      res.json([]);
+    }
   }
 );
 
