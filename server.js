@@ -236,6 +236,42 @@ function write(file, data) {
   );
 }
 
+/*
+ * Initialize persistent storage BEFORE API routes.
+ * This guarantees admin and public APIs use the same
+ * current catalog.
+ */
+
+
+
+
+const persistentStoreReady = initPersistentStore({
+  orders: JSON.parse(fs.readFileSync(files.orders, "utf8")),
+  products: JSON.parse(fs.readFileSync(files.products, "utf8")),
+  posts: JSON.parse(fs.readFileSync(files.posts, "utf8")),
+  subscribers: JSON.parse(fs.readFileSync(files.subscribers, "utf8"))
+}).catch(error => {
+  console.error(
+    "ARWA PostgreSQL initialization failed:",
+    error.message
+  );
+
+  throw error;
+});
+
+/*
+ * PostgreSQL must be ready BEFORE any API route is allowed
+ * to read or write persistent data.
+ */
+app.use(async (req, res, next) => {
+  try {
+    await persistentStoreReady;
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.use(express.json({ limit: "1mb" }));
 app.use(express.static(
   path.join(__dirname, "public")
@@ -1034,62 +1070,7 @@ app.get(
   (req, res) => {
 
     const products =
-      read(files.products);
-
-    const orders =
-      read(files.orders);
-
-    const subscribers =
-      read(files.subscribers);
-
-    res.json({
-
-      products:
-        products.filter(
-          p => p.active !== false
-        ).length,
-
-      orders:
-        orders.length,
-
-      newOrders:
-        orders.filter(
-          o => o.status === "new"
-        ).length,
-
-      subscribers:
-        subscribers.length
-
-    });
-  }
-);
-
-
-/* ADMIN APP */
-
-app.get(
-  "/admin",
-  (req, res) => {
-
-    res.sendFile(
-      path.join(
-        __dirname,
-        "public",
-        "admin.html"
-      )
-    );
-
-  }
-);
-
-
-/* FRONTEND FALLBACK */
-
-app.use(
-  (req, res) => {
-
-    res.sendFile(
-      path.join(
+      read(files.produjoin(
         __dirname,
         "public",
         "index.html"
@@ -1100,32 +1081,7 @@ app.use(
 );
 
 
-const persistentStoreReady = initPersistentStore({
-  orders: JSON.parse(fs.readFileSync(files.orders, "utf8")),
-  products: JSON.parse(fs.readFileSync(files.products, "utf8")),
-  posts: JSON.parse(fs.readFileSync(files.posts, "utf8")),
-  subscribers: JSON.parse(fs.readFileSync(files.subscribers, "utf8"))
-}).catch(error => {
-  console.error(
-    "ARWA PostgreSQL initialization failed:",
-    error.message
-  );
 
-  throw error;
-});
-
-/*
- * PostgreSQL must be ready BEFORE any API route is allowed
- * to read or write persistent data.
- */
-app.use(async (req, res, next) => {
-  try {
-    await persistentStoreReady;
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
 
 
 app.listen(
