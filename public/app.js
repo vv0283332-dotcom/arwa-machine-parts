@@ -856,78 +856,145 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+
 /* =========================================================
-   ARWA PWA INSTALL
+   ARWA PWA INSTALL SYSTEM
    ========================================================= */
 
 let arwaInstallPrompt = null;
 
-window.addEventListener("beforeinstallprompt", event => {
-  event.preventDefault();
-  arwaInstallPrompt = event;
+function arwaInstallButton() {
+  return document.querySelector("#installApp");
+}
 
-  const button = document.querySelector("#installApp");
-
-  if (button) {
-    button.hidden = false;
-  }
-});
-
-window.addEventListener("appinstalled", () => {
-  arwaInstallPrompt = null;
-
-  const button = document.querySelector("#installApp");
-
-  if (button) {
-    button.hidden = true;
-  }
-
-  console.log("ARWA installed successfully.");
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  const button = document.querySelector("#installApp");
+function showArwaInstallButton() {
+  const button = arwaInstallButton();
 
   if (!button) return;
 
-  button.addEventListener("click", async () => {
-    if (!arwaInstallPrompt) {
-      alert(
-        "To install ARWA, use your browser menu and choose " +
-        "\"Add to Home screen\" or \"Install app\"."
-      );
-      return;
-    }
-
-    arwaInstallPrompt.prompt();
-
-    try {
-      await arwaInstallPrompt.userChoice;
-    } catch (error) {
-      console.warn("ARWA install prompt:", error);
-    }
-
-    arwaInstallPrompt = null;
+  if (window.matchMedia("(display-mode: standalone)").matches) {
     button.hidden = true;
-  });
+    return;
+  }
+
+  button.hidden = false;
+}
+
+function hideArwaInstallButton() {
+  const button = arwaInstallButton();
+
+  if (button) {
+    button.hidden = true;
+  }
+}
+
+/*
+ * Chrome / Edge / Android browsers fire this when
+ * the site is considered installable.
+ */
+window.addEventListener("beforeinstallprompt", event => {
+  event.preventDefault();
+
+  arwaInstallPrompt = event;
+
+  showArwaInstallButton();
+
+  console.log("ARWA install prompt available.");
 });
 
-/* Register the ARWA service worker. */
+/*
+ * Native installation completed.
+ */
+window.addEventListener("appinstalled", () => {
+  arwaInstallPrompt = null;
+  hideArwaInstallButton();
+
+  console.log("ARWA installed.");
+});
+
+async function installArwa() {
+  if (!arwaInstallPrompt) {
+    alert(
+      "ARWA can be installed from your browser menu. " +
+      "Open the browser menu and choose " +
+      "\"Install app\" or \"Add to Home screen\"."
+    );
+    return;
+  }
+
+  try {
+    arwaInstallPrompt.prompt();
+
+    const result =
+      await arwaInstallPrompt.userChoice;
+
+    console.log(
+      "ARWA install result:",
+      result.outcome
+    );
+
+  } catch (error) {
+    console.error(
+      "ARWA installation failed:",
+      error
+    );
+  }
+
+  arwaInstallPrompt = null;
+  hideArwaInstallButton();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const button = arwaInstallButton();
+
+  if (!button) return;
+
+  button.addEventListener(
+    "click",
+    installArwa
+  );
+
+  /*
+   * If already installed as a standalone app,
+   * keep the button hidden.
+   */
+  if (
+    window.matchMedia(
+      "(display-mode: standalone)"
+    ).matches ||
+    window.navigator.standalone === true
+  ) {
+    hideArwaInstallButton();
+  }
+});
+
+/*
+ * Register service worker.
+ */
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("/sw.js", { scope: "/" })
-      .then(registration => {
-        console.log(
-          "ARWA service worker registered:",
-          registration.scope
+  window.addEventListener("load", async () => {
+    try {
+      const registration =
+        await navigator.serviceWorker.register(
+          "/sw.js",
+          { scope: "/" }
         );
-      })
-      .catch(error => {
-        console.error(
-          "ARWA service worker registration failed:",
-          error
-        );
-      });
+
+      console.log(
+        "ARWA service worker:",
+        registration.scope
+      );
+
+      /*
+       * Check for updates.
+       */
+      registration.update();
+
+    } catch (error) {
+      console.error(
+        "ARWA service worker registration failed:",
+        error
+      );
+    }
   });
 }
