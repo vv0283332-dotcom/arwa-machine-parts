@@ -1,11 +1,11 @@
 [
   {
-    "id": "PMT63E2PX",
-    "name": "battery",
-    "category": "cd110",
-    "description": "available",
-    "price": 3800,
-    "stock": 0,
+    "id": "PMT5WS1D6",
+    "name": "Rear Sprocket",
+    "category": "CD110",
+    "description": "Available now.",
+    "price": 700,
+    "stock": 1,
     "active": true
   }
 ]
