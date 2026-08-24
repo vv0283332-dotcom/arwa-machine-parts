@@ -854,3 +854,80 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 });
+
+
+/* =========================================================
+   ARWA PWA INSTALL
+   ========================================================= */
+
+let arwaInstallPrompt = null;
+
+window.addEventListener("beforeinstallprompt", event => {
+  event.preventDefault();
+  arwaInstallPrompt = event;
+
+  const button = document.querySelector("#installApp");
+
+  if (button) {
+    button.hidden = false;
+  }
+});
+
+window.addEventListener("appinstalled", () => {
+  arwaInstallPrompt = null;
+
+  const button = document.querySelector("#installApp");
+
+  if (button) {
+    button.hidden = true;
+  }
+
+  console.log("ARWA installed successfully.");
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const button = document.querySelector("#installApp");
+
+  if (!button) return;
+
+  button.addEventListener("click", async () => {
+    if (!arwaInstallPrompt) {
+      alert(
+        "To install ARWA, use your browser menu and choose " +
+        "\"Add to Home screen\" or \"Install app\"."
+      );
+      return;
+    }
+
+    arwaInstallPrompt.prompt();
+
+    try {
+      await arwaInstallPrompt.userChoice;
+    } catch (error) {
+      console.warn("ARWA install prompt:", error);
+    }
+
+    arwaInstallPrompt = null;
+    button.hidden = true;
+  });
+});
+
+/* Register the ARWA service worker. */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/sw.js", { scope: "/" })
+      .then(registration => {
+        console.log(
+          "ARWA service worker registered:",
+          registration.scope
+        );
+      })
+      .catch(error => {
+        console.error(
+          "ARWA service worker registration failed:",
+          error
+        );
+      });
+  });
+}
