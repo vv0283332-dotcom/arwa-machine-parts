@@ -518,7 +518,7 @@ app.post(
   "/api/admin/products",
   authenticate,
   imageUpload.single("image"),
-  (req, res) => {
+  async (req, res) => {
 
     const {
       name,
@@ -583,12 +583,23 @@ app.post(
 
     products.unshift(product);
 
-    write(
-      files.products,
-      products
-    );
+    try {
+      await write(
+        files.products,
+        products
+      );
 
-    res.status(201).json(product);
+      res.status(201).json(product);
+    } catch (error) {
+      console.error(
+        "ARWA product persistence failed:",
+        error.message
+      );
+
+      return res.status(500).json({
+        error: "Product could not be saved."
+      });
+    }
   }
 );
 
@@ -596,7 +607,7 @@ app.post(
 app.put(
   "/api/admin/products/:id",
   authenticate,
-  (req, res) => {
+  async (req, res) => {
 
     const products =
       read(files.products);
@@ -621,12 +632,23 @@ app.put(
       id: old.id
     };
 
-    write(
-      files.products,
-      products
-    );
+    try {
+      await write(
+        files.products,
+        products
+      );
 
-    res.json(products[index]);
+      res.json(products[index]);
+    } catch (error) {
+      console.error(
+        "ARWA product update persistence failed:",
+        error.message
+      );
+
+      return res.status(500).json({
+        error: "Product update could not be saved."
+      });
+    }
   }
 );
 
@@ -1069,18 +1091,33 @@ app.get(
   authenticate,
   (req, res) => {
 
-    const products =
-      read(files.produjoin(
-        __dirname,
-        "public",
-        "index.html"
-      )
-    );
+    const products = read(files.products);
+    const orders = read(files.orders);
+    const posts = read(files.posts);
+    const subscribers = read(files.subscribers);
+
+    res.json({
+      success: true,
+      products: products.length,
+      activeProducts: products.filter(
+        product => product.active !== false
+      ).length,
+      orders: orders.length,
+      posts: posts.length,
+      subscribers: subscribers.length
+    });
 
   }
 );
 
 
+/* ADMIN DASHBOARD */
+
+app.get("/admin", (req, res) => {
+  res.sendFile(
+    path.join(__dirname, "public", "admin.html")
+  );
+});
 
 
 
