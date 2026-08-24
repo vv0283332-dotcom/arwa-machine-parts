@@ -227,14 +227,7 @@ function write(file, data) {
   const key = storeKeys.get(file);
 
   if (key) {
-    persistentWrite(key, data).catch(error => {
-      console.error(
-        "ARWA persistent storage error:",
-        error.message
-      );
-    });
-
-    return;
+    return persistentWrite(key, data);
   }
 
   fs.writeFileSync(
@@ -754,7 +747,7 @@ app.post(
   "/api/admin/posts",
   authenticate,
   mediaUpload.single("media"),
-  (req, res) => {
+  async (req, res) => {
 
     const {
       title,
@@ -803,12 +796,23 @@ app.post(
 
     posts.unshift(post);
 
-    write(
-      files.posts,
-      posts
-    );
+    try {
+      await write(
+        files.posts,
+        posts
+      );
 
-    res.status(201).json(post);
+      res.status(201).json(post);
+    } catch (error) {
+      console.error(
+        "ARWA post persistence failed:",
+        error.message
+      );
+
+      return res.status(500).json({
+        error: "Post could not be permanently stored."
+      });
+    }
   }
 );
 
@@ -819,7 +823,7 @@ app.patch(
   "/api/admin/posts/:id",
   authenticate,
   imageUpload.single("image"),
-  (req, res) => {
+  async (req, res) => {
 
     const posts = read(files.posts);
 
@@ -864,9 +868,19 @@ app.patch(
 
     posts[index] = post;
 
-    write(files.posts, posts);
+    try {
+      await write(files.posts, posts);
+      res.json(post);
+    } catch (error) {
+      console.error(
+        "ARWA post update persistence failed:",
+        error.message
+      );
 
-    res.json(post);
+      return res.status(500).json({
+        error: "Post update could not be permanently stored."
+      });
+    }
   }
 );
 
@@ -874,7 +888,7 @@ app.patch(
 app.delete(
   "/api/admin/posts/:id",
   authenticate,
-  (req, res) => {
+  async (req, res) => {
 
     const posts = read(files.posts);
 
@@ -891,12 +905,23 @@ app.delete(
     const deleted =
       posts.splice(index, 1)[0];
 
-    write(files.posts, posts);
+    try {
+      await write(files.posts, posts);
 
-    res.json({
-      success: true,
-      post: deleted
-    });
+      res.json({
+        success: true,
+        post: deleted
+      });
+    } catch (error) {
+      console.error(
+        "ARWA post delete persistence failed:",
+        error.message
+      );
+
+      return res.status(500).json({
+        error: "Post deletion could not be permanently stored."
+      });
+    }
   }
 );
 
@@ -1076,17 +1101,23 @@ app.use(
 
 
 const persistentStoreReady = initPersistentStore({
-  orders: read(files.orders),
-  products: read(files.products),
-  posts: read(files.posts),
-  subscribers: read(files.subscribers)
+  orders: JSON.parse(fs.readFileSync(files.orders, "utf8")),
+  products: JSON.parse(fs.readFileSync(files.products, "utf8")),
+  posts: JSON.parse(fs.readFileSync(files.posts, "utf8")),
+  subscribers: JSON.parse(fs.readFileSync(files.subscribers, "utf8"))
 }).catch(error => {
   console.error(
     "ARWA PostgreSQL initialization failed:",
     error.message
   );
+
+  throw error;
 });
 
+/*
+ * PostgreSQL must be ready BEFORE any API route is allowed
+ * to read or write persistent data.
+ */
 app.use(async (req, res, next) => {
   try {
     await persistentStoreReady;
