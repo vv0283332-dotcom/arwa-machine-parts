@@ -165,7 +165,7 @@ function productWhatsApp(product) {
     `Price: ${formatPrice(product.price)}%0A%0A` +
     `Please confirm availability.`;
 
-  return `https://wa.me/${whatsappNumbers[0]}?text=${message}`;
+  return `https://wa.me/22962347899?text=${message}`;
 }
 
 
@@ -728,39 +728,3 @@ loadProducts = async function() {
 
 loadProducts();
 renderCart();
-
-/* ARWA LIVE CATALOG SYNC
- * The public store periodically reloads the same catalog
- * managed by the Admin dashboard.
- */
-let arwaCatalogSignature = "";
-
-async function syncPublicCatalog() {
-  try {
-    const response = await fetch("/api/products", {
-      cache: "no-store",
-      headers: {
-        "Cache-Control": "no-cache"
-      }
-    });
-
-    if (!response.ok) return;
-
-    const latest = await response.json();
-
-    const signature = JSON.stringify(latest);
-
-    if (signature !== arwaCatalogSignature) {
-      arwaCatalogSignature = signature;
-      products = latest;
-      updateCategoryFilter();
-      renderProducts();
-      renderCart();
-    }
-  } catch (error) {
-    console.warn("ARWA catalog sync failed:", error);
-  }
-}
-
-setInterval(syncPublicCatalog, 5000);
-

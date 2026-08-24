@@ -1,0 +1,1179 @@
+:root {
+  --bg: #0b0d0f;
+  --surface: #111417;
+  --surface-2: #171b1f;
+  --border: rgba(255,255,255,.09);
+  --text: #f5f5f2;
+  --muted: #9da4aa;
+  --gold: #c9a227;
+  --gold-light: #e0bd45;
+  --white: #ffffff;
+  --danger: #e05252;
+  --radius: 18px;
+  --shadow: 0 20px 60px rgba(0,0,0,.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 80% 0%, rgba(201,162,39,.10), transparent 30%),
+    var(--bg);
+  color: var(--text);
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* HEADER */
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(11,13,15,.92);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--border);
+}
+
+nav,
+.navbar,
+.header-inner {
+  max-width: 1180px;
+  margin: auto;
+  padding: 18px 24px;
+}
+
+.logo,
+.brand {
+  font-weight: 900;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.logo::after,
+.brand::after {
+  content: "";
+  display: block;
+  width: 32px;
+  height: 2px;
+  margin-top: 4px;
+  background: var(--gold);
+}
+
+/* HERO */
+
+.hero,
+.hero-section {
+  min-height: 620px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  padding: 90px 24px;
+  background:
+    linear-gradient(90deg, rgba(7,8,9,.98), rgba(7,8,9,.78), rgba(7,8,9,.25)),
+    radial-gradient(circle at 80% 50%, rgba(201,162,39,.12), transparent 35%);
+}
+
+.hero::after,
+.hero-section::after {
+  content: "ARWA";
+  position: absolute;
+  right: -40px;
+  bottom: -90px;
+  font-size: clamp(120px, 25vw, 320px);
+  font-weight: 900;
+  color: rgba(255,255,255,.025);
+  pointer-events: none;
+}
+
+.hero h1,
+.hero-section h1 {
+  max-width: 850px;
+  margin: 0 0 22px;
+  font-size: clamp(42px, 7vw, 88px);
+  line-height: .98;
+  letter-spacing: -.04em;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.hero h1 span,
+.hero-section h1 span {
+  color: var(--gold);
+}
+
+.hero p,
+.hero-section p {
+  max-width: 650px;
+  color: var(--muted);
+  font-size: 18px;
+}
+
+/* BUTTONS */
+
+button,
+.button {
+  border: 0;
+  border-radius: 999px;
+  padding: 13px 22px;
+  font-weight: 800;
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease,
+    background .2s ease;
+}
+
+button:hover,
+.button:hover {
+  transform: translateY(-2px);
+}
+
+.button.primary,
+button.primary {
+  background: var(--gold);
+  color: #080808;
+  box-shadow: 0 10px 30px rgba(201,162,39,.18);
+}
+
+.button.primary:hover,
+button.primary:hover {
+  background: var(--gold-light);
+}
+
+/* SECTIONS */
+
+.section {
+  max-width: 1180px;
+  margin: auto;
+  padding: 90px 24px;
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 30px;
+  margin-bottom: 35px;
+}
+
+.section-heading h2 {
+  margin: 5px 0 0;
+  font-size: clamp(32px, 5vw, 54px);
+  line-height: 1;
+  letter-spacing: -.03em;
+}
+
+.eyebrow,
+.product-category {
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+/* FILTERS */
+
+.filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filters input,
+.filters select,
+input,
+select,
+textarea {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 13px 15px;
+  outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: rgba(201,162,39,.65);
+  box-shadow: 0 0 0 3px rgba(201,162,39,.08);
+}
+
+/* PRODUCTS */
+
+#productsGrid,
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.product {
+  overflow: hidden;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition:
+    transform .25s ease,
+    border-color .25s ease,
+    box-shadow .25s ease;
+}
+
+.product:hover {
+  transform: translateY(-7px);
+  border-color: rgba(201,162,39,.35);
+  box-shadow: 0 25px 70px rgba(0,0,0,.5);
+}
+
+.product-image {
+  height: 270px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle, rgba(201,162,39,.08), transparent 55%),
+    #080a0c;
+  border-bottom: 1px solid var(--border);
+  font-size: 80px;
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.product-body {
+  padding: 23px;
+}
+
+.product-body h3 {
+  margin: 8px 0;
+  font-size: 23px;
+  letter-spacing: -.02em;
+}
+
+.product-body p {
+  color: var(--muted);
+  min-height: 48px;
+}
+
+.product-body .button {
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* CONTACT STRIP */
+
+.contact-strip {
+  max-width: 1180px;
+  margin: 20px auto;
+  padding: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  background:
+    linear-gradient(135deg, rgba(201,162,39,.13), rgba(255,255,255,.025));
+  border: 1px solid rgba(201,162,39,.25);
+  border-radius: var(--radius);
+}
+
+.contact-strip strong {
+  display: block;
+  font-size: 22px;
+}
+
+.contact-strip span {
+  color: var(--muted);
+}
+
+.contact-strip a {
+  color: var(--gold-light);
+  font-size: 20px;
+  font-weight: 900;
+}
+
+/* CART */
+
+#cart,
+.cart {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* FOOTER */
+
+footer {
+  margin-top: 80px;
+  padding: 55px 24px;
+  background: #080a0c;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+}
+
+footer strong {
+  color: var(--text);
+}
+
+/* MOBILE */
+
+@media (max-width: 850px) {
+  .hero,
+  .hero-section {
+    min-height: 560px;
+    padding: 70px 20px;
+  }
+
+  .section {
+    padding: 65px 18px;
+  }
+
+  .section-heading {
+    display: block;
+  }
+
+  .filters {
+    margin-top: 22px;
+  }
+
+  #productsGrid,
+  .products-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .product-image {
+    height: 220px;
+  }
+
+  .contact-strip {
+    margin: 15px 18px;
+    display: block;
+  }
+
+  .contact-strip a {
+    display: inline-block;
+    margin-top: 15px;
+  }
+}
+
+@media (max-width: 560px) {
+  .hero h1,
+  .hero-section h1 {
+    font-size: 43px;
+  }
+
+  #productsGrid,
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-image {
+    height: 260px;
+  }
+
+  .filters input,
+  .filters select {
+    width: 100%;
+  }
+}
+
+/* SMALL DETAILS */
+
+::selection {
+  background: var(--gold);
+  color: #000;
+}
+
+::-webkit-scrollbar {
+  width: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: #080a0c;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #30343a;
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold);
+}
+
+/* =========================
+   ARWA PRODUCT SHOWROOM
+========================= */
+
+.product-placeholder {
+  font-size: 78px;
+  color: var(--gold-dark);
+}
+
+.product-meta {
+  margin: 18px 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding-top: 15px;
+
+  border-top: 1px solid var(--line);
+}
+
+.product-price {
+  color: var(--navy);
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 17px;
+}
+
+.product-stock {
+  color: var(--gold-dark);
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.product-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.product-actions .button {
+  width: 100%;
+  padding: 11px 8px;
+  font-size: 12px;
+}
+
+.empty-products {
+  grid-column: 1 / -1;
+
+  padding: 70px 30px;
+
+  text-align: center;
+
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+
+.empty-products strong {
+  display: block;
+
+  color: var(--navy);
+
+  font-size: 30px;
+}
+
+.empty-products p {
+  max-width: 500px;
+
+  margin: 12px auto 25px;
+
+  color: var(--muted);
+
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.7;
+}
+
+@media (max-width: 560px) {
+
+  .product-actions {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+/* =========================================================
+   ARWA CLASSIC INDUSTRIAL PRODUCT SHOWROOM
+   ========================================================= */
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+  margin-top: 34px;
+}
+
+
+.product-card {
+  position: relative;
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      180deg,
+      #171b1f 0%,
+      #101316 100%
+    );
+
+  border: 1px solid #2c3339;
+  border-radius: 4px;
+
+  box-shadow:
+    0 12px 30px rgba(0,0,0,.22);
+
+  cursor: pointer;
+
+  transition:
+    transform .22s ease,
+    border-color .22s ease,
+    box-shadow .22s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+
+  border-color:
+    rgba(244,183,63,.65);
+
+  box-shadow:
+    0 20px 45px rgba(0,0,0,.38);
+}
+
+
+.product-photo {
+  height: 235px;
+
+  position: relative;
+
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      135deg,
+      #22282d,
+      #101316
+    );
+
+  border-bottom: 1px solid #2b3238;
+}
+
+.product-photo img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+
+  transition:
+    transform .35s ease;
+}
+
+.product-card:hover
+.product-photo img {
+  transform: scale(1.045);
+}
+
+
+.product-placeholder {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  color: #69747d;
+
+  background:
+    radial-gradient(
+      circle at center,
+      #303940 0,
+      #171c20 45%,
+      #0e1113 100%
+    );
+}
+
+.product-placeholder span {
+  color: #d79b2f;
+
+  font-size: 10px;
+  font-weight: 900;
+
+  letter-spacing: .28em;
+}
+
+.product-placeholder strong {
+  margin: 8px 0;
+
+  font-size: 58px;
+
+  font-weight: 400;
+}
+
+.product-placeholder small {
+  color: #78838c;
+
+  font-size: 8px;
+
+  letter-spacing: .25em;
+}
+
+
+.category-badge {
+  display: inline-flex;
+
+  align-items: center;
+
+  padding: 5px 8px;
+
+  border: 1px solid
+    rgba(244,183,63,.4);
+
+  background:
+    rgba(244,183,63,.09);
+
+  color: #f4b73f;
+
+  font-size: 9px;
+  font-weight: 900;
+
+  text-transform: uppercase;
+
+  letter-spacing: .1em;
+}
+
+
+.product-category-badge {
+  position: absolute;
+
+  top: 12px;
+  left: 12px;
+}
+
+
+.availability {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  padding: 5px 8px;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: .04em;
+
+  border-radius: 2px;
+}
+
+.availability > span {
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  display: block;
+}
+
+.in-stock {
+  background: rgba(68,180,100,.12);
+  color: #79d990;
+}
+
+.in-stock > span {
+  background: #69cf82;
+}
+
+.on-request {
+  background: rgba(244,183,63,.12);
+  color: #f4c55f;
+}
+
+.on-request > span {
+  background: #f4b73f;
+}
+
+
+.product-photo > .availability {
+  position: absolute;
+
+  right: 12px;
+  bottom: 12px;
+}
+
+
+.product-card-body {
+  padding: 20px;
+}
+
+
+.product-card-top {
+  margin-bottom: 8px;
+
+  color: #737d85;
+
+  font-size: 8px;
+  font-weight: 800;
+
+  letter-spacing: .16em;
+}
+
+
+.product-card h3 {
+  margin: 0 0 9px;
+
+  color: #f4f5f5;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 23px;
+
+  line-height: 1.05;
+}
+
+
+.product-card p {
+  min-height: 42px;
+
+  margin: 0;
+
+  color: #8f989f;
+
+  font-size: 13px;
+
+  line-height: 1.55;
+}
+
+
+.product-card-footer {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin-top: 20px;
+}
+
+
+.product-price {
+  color: #f4b73f;
+
+  font-size: 17px;
+
+  white-space: nowrap;
+}
+
+
+.view-product {
+  color: #aeb6bc;
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+
+.product-whatsapp {
+  width: 100%;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 16px;
+
+  padding: 12px;
+
+  border: 1px solid #354047;
+
+  background: #151a1e;
+
+  color: #f2f3f3;
+
+  font-size: 11px;
+  font-weight: 900;
+
+  letter-spacing: .04em;
+
+  transition:
+    background .2s ease,
+    border-color .2s ease;
+}
+
+.product-whatsapp:hover {
+  background: #1e2925;
+  border-color: #52675b;
+}
+
+
+.empty-products {
+  grid-column: 1 / -1;
+
+  text-align: center;
+
+  padding: 70px 20px;
+
+  border: 1px dashed #343c43;
+
+  background: #101417;
+}
+
+.empty-products-icon {
+  font-size: 45px;
+
+  color: #f4b73f;
+
+  margin-bottom: 15px;
+}
+
+.empty-products h3 {
+  margin: 0 0 8px;
+
+  font-family: Georgia, serif;
+
+  font-size: 25px;
+}
+
+.empty-products p {
+  margin: 0;
+
+  color: #8d979e;
+}
+
+
+/* PRODUCT DETAIL */
+
+.product-modal {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 9999;
+
+  display: grid;
+
+  place-items: center;
+
+  padding: 20px;
+}
+
+.product-modal-backdrop {
+  position: absolute;
+
+  inset: 0;
+
+  background: rgba(0,0,0,.78);
+
+  backdrop-filter: blur(7px);
+}
+
+.product-modal-card {
+  width: min(900px, 100%);
+
+  max-height: 92vh;
+
+  overflow: auto;
+
+  position: relative;
+
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  background: #121619;
+
+  border: 1px solid #39434b;
+
+  box-shadow:
+    0 30px 100px rgba(0,0,0,.65);
+
+  z-index: 1;
+}
+
+
+.product-modal-close {
+  position: absolute;
+
+  top: 14px;
+  right: 14px;
+
+  z-index: 3;
+
+  width: 38px;
+  height: 38px;
+
+  border: 1px solid #3b454c;
+
+  background: #111519;
+
+  color: #fff;
+
+  font-size: 24px;
+
+  cursor: pointer;
+}
+
+
+.product-detail-image {
+  min-height: 440px;
+
+  background: #0d1012;
+
+  display: grid;
+
+  place-items: center;
+}
+
+.product-detail-image img {
+  width: 100%;
+  height: 100%;
+
+  min-height: 440px;
+
+  object-fit: cover;
+}
+
+.product-placeholder-large {
+  font-size: 100px;
+
+  color: #f4b73f;
+}
+
+
+.product-detail-content {
+  padding: 55px 38px 38px;
+}
+
+.product-detail-content h2 {
+  margin: 18px 0 15px;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: clamp(32px, 5vw, 52px);
+
+  line-height: 1;
+}
+
+
+.product-detail-description {
+  color: #9ba4aa;
+
+  line-height: 1.7;
+}
+
+
+.product-detail-price {
+  margin-top: 28px;
+
+  color: #f4b73f;
+
+  font-size: 26px;
+  font-weight: 900;
+}
+
+
+.product-detail-actions {
+  display: flex;
+
+  gap: 10px;
+
+  margin-top: 30px;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 1050px) {
+
+  .products-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+}
+
+
+@media (max-width: 760px) {
+
+  .products-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+  }
+
+  .product-photo {
+    height: 185px;
+  }
+
+  .product-card-body {
+    padding: 14px;
+  }
+
+  .product-card h3 {
+    font-size: 19px;
+  }
+
+  .product-card p {
+    min-height: auto;
+    font-size: 12px;
+  }
+
+  .product-card-footer {
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    gap: 7px;
+  }
+
+  .view-product {
+    display: none;
+  }
+
+  .product-whatsapp {
+    font-size: 10px;
+  }
+
+  .product-modal-card {
+    grid-template-columns: 1fr;
+  }
+
+  .product-detail-image,
+  .product-detail-image img {
+    min-height: 270px;
+    height: 270px;
+  }
+
+  .product-detail-content {
+    padding: 30px 22px 25px;
+  }
+
+}
+
+
+@media (max-width: 480px) {
+
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-photo {
+    height: 230px;
+  }
+
+  .product-card h3 {
+    font-size: 23px;
+  }
+
+  .product-card-footer {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .product-whatsapp {
+    padding: 13px;
+  }
+
+}
+
+/* ARWA INVENTORY STATUS */
+
+.availability.out-of-stock {
+  background: rgba(150, 30, 30, 0.92);
+  color: #fff;
+}
+
+.availability.out-of-stock span {
+  background: #fff;
+}
+
+.product-disabled {
+  opacity: .55;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+.product-whatsapp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+}
+
+@media (max-width: 600px) {
+  .product-card {
+    border-radius: 16px;
+  }
+
+  .product-card-body {
+    padding: 16px;
+  }
+
+  .product-card-footer {
+    gap: 10px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .product-price {
+    font-size: 20px;
+  }
+
+  .product-whatsapp {
+    width: 100%;
+  }
+}
+
