@@ -7,6 +7,11 @@ import jwt from "jsonwebtoken";
 import multer from "multer";
 import { fileURLToPath } from "node:url";
 import { securityAlert } from "./security-monitor.js";
+import {
+  initPersistentStore,
+  persistentRead,
+  persistentWrite
+} from "./persistent-store.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -196,13 +201,42 @@ ensureFile(files.products, defaultProducts);
 ensureFile(files.posts);
 ensureFile(files.subscribers);
 
+const storeKeys = new Map([
+  [files.orders, "orders"],
+  [files.products, "products"],
+  [files.posts, "posts"],
+  [files.subscribers, "subscribers"]
+]);
+
 function read(file) {
+  const key = storeKeys.get(file);
+
+  if (key) {
+    return persistentRead(
+      key,
+      JSON.parse(fs.readFileSync(file, "utf8"))
+    );
+  }
+
   return JSON.parse(
     fs.readFileSync(file, "utf8")
   );
 }
 
 function write(file, data) {
+  const key = storeKeys.get(file);
+
+  if (key) {
+    persistentWrite(key, data).catch(error => {
+      console.error(
+        "ARWA persistent storage error:",
+        error.message
+      );
+    });
+
+    return;
+  }
+
   fs.writeFileSync(
     file,
     JSON.stringify(data, null, 2)
@@ -1039,6 +1073,28 @@ app.use(
 
   }
 );
+
+
+const persistentStoreReady = initPersistentStore({
+  orders: read(files.orders),
+  products: read(files.products),
+  posts: read(files.posts),
+  subscribers: read(files.subscribers)
+}).catch(error => {
+  console.error(
+    "ARWA PostgreSQL initialization failed:",
+    error.message
+  );
+});
+
+app.use(async (req, res, next) => {
+  try {
+    await persistentStoreReady;
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 
 app.listen(
