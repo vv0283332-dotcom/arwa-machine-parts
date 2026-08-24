@@ -1,3 +1,10 @@
+const WHATSAPP_NUMBERS = [
+  "22962347899",
+  "22957126009"
+];
+
+const WHATSAPP = WHATSAPP_NUMBERS[0];
+
 let products = [];
 
 async function loadProducts() {
@@ -157,15 +164,36 @@ function productAvailability(product) {
 }
 
 
+function whatsappURL(message, number = WHATSAPP) {
+  const cleanNumber =
+    String(number || WHATSAPP).replace(/\D/g, "");
+
+  return "https://wa.me/" +
+    cleanNumber +
+    "?text=" +
+    encodeURIComponent(message);
+}
+
+
 function productWhatsApp(product) {
+  const selectedNumber =
+    document.querySelector("#whatsappNumber")?.value ||
+    WHATSAPP;
+
   const message =
-    `Hello ARWA, I am interested in this machine part:%0A%0A` +
-    `Product: ${product.name}%0A` +
-    `Category: ${product.category}%0A` +
-    `Price: ${formatPrice(product.price)}%0A%0A` +
+    `Hello ARWA, I am interested in this machine part:
+
+` +
+    `Product: ${product.name || "Machine part"}
+` +
+    `Category: ${product.category || "N/A"}
+` +
+    `Price: ${formatPrice(product.price)}
+
+` +
     `Please confirm availability.`;
 
-  return `https://wa.me/${whatsappNumbers[0]}?text=${message}`;
+  return whatsappURL(message, selectedNumber);
 }
 
 
@@ -726,6 +754,55 @@ loadProducts = async function() {
 };
 
 
+function sendWhatsAppOrder() {
+  if (!cart.length) {
+    showToast("Your order is empty.");
+    return;
+  }
+
+  const selectedNumber =
+    document.querySelector("#whatsappNumber")?.value ||
+    WHATSAPP;
+
+  const items = cart.map(item => {
+    const product = products.find(
+      p => String(p.id) === String(item.id)
+    );
+
+    if (!product) return null;
+
+    return [
+      `Product: ${product.name}`,
+      `Category: ${product.category || "N/A"}`,
+      `Quantity: ${item.quantity}`,
+      `Price: ${formatPrice(product.price)}`
+    ].join("\n");
+  }).filter(Boolean);
+
+  if (!items.length) {
+    showToast("Unable to prepare your order.");
+    return;
+  }
+
+  const note =
+    document.querySelector("#orderNote")?.value.trim() || "";
+
+  let message =
+    "Hello ARWA, I would like to place an order.\n\n" +
+    items.join("\n\n");
+
+  if (note) {
+    message += "\n\nOrder note:\n" + note;
+  }
+
+  message +=
+    "\n\nPlease confirm availability and total price.";
+
+  window.location.href =
+    whatsappURL(message, selectedNumber);
+}
+
+
 loadProducts();
 renderCart();
 
@@ -764,3 +841,16 @@ async function syncPublicCatalog() {
 
 setInterval(syncPublicCatalog, 5000);
 
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const whatsappOrder =
+    document.querySelector("#whatsappOrder");
+
+  if (whatsappOrder) {
+    whatsappOrder.addEventListener(
+      "click",
+      sendWhatsAppOrder
+    );
+  }
+});
