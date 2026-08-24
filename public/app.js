@@ -165,7 +165,7 @@ function productWhatsApp(product) {
     `Price: ${formatPrice(product.price)}%0A%0A` +
     `Please confirm availability.`;
 
-  return `https://wa.me/22962347899?text=${message}`;
+  return `https://wa.me/${whatsappNumbers[0]}?text=${message}`;
 }
 
 
