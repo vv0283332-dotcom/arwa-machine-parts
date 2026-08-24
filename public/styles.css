@@ -1441,3 +1441,29 @@ footer {
 .product-whatsapp:hover {
   background: #c02020 !important;
 }
+
+/* ARWA MAIN BRAND — LARGE TOP LOGO */
+header .logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+header .logo-word {
+  display: block;
+  font-size: clamp(32px, 6vw, 58px);
+  line-height: 1;
+  font-weight: 950;
+  letter-spacing: .08em;
+  color: var(--arwa-white);
+  text-transform: uppercase;
+}
+
+header .logo-word::after {
+  content: "";
+  display: block;
+  width: 55%;
+  height: 3px;
+  margin-top: 7px;
+  background: var(--arwa-red);
+}
