@@ -25,6 +25,15 @@ export async function initPersistentStore(initialData = {}) {
     )
   `);
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS arwa_media (
+      media_key TEXT PRIMARY KEY,
+      mime_type TEXT NOT NULL,
+      media_data BYTEA NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
   for (const [key, fallback] of Object.entries(initialData)) {
     const result = await pool.query(
       `SELECT store_value FROM arwa_store WHERE store_key = $1`,
@@ -77,3 +86,46 @@ export async function persistentWrite(key, value) {
 }
 
 export { pool };
+
+
+export async function persistentSaveMedia(
+  mediaKey,
+  mimeType,
+  buffer
+) {
+  if (!process.env.DATABASE_URL) {
+    return false;
+  }
+
+  await pool.query(
+    `INSERT INTO arwa_media
+      (media_key, mime_type, media_data)
+     VALUES ($1, $2, $3)
+     ON CONFLICT (media_key)
+     DO UPDATE SET
+       mime_type = EXCLUDED.mime_type,
+       media_data = EXCLUDED.media_data`,
+    [mediaKey, mimeType, buffer]
+  );
+
+  return true;
+}
+
+export async function persistentGetMedia(mediaKey) {
+  if (!process.env.DATABASE_URL) {
+    return null;
+  }
+
+  const result = await pool.query(
+    `SELECT mime_type, media_data
+       FROM arwa_media
+      WHERE media_key = $1`,
+    [mediaKey]
+  );
+
+  if (!result.rows.length) {
+    return null;
+  }
+
+  return result.rows[0];
+}

@@ -10,7 +10,9 @@ import { securityAlert } from "./security-monitor.js";
 import {
   initPersistentStore,
   persistentRead,
-  persistentWrite
+  persistentWrite,
+  persistentSaveMedia,
+  persistentGetMedia
 } from "./persistent-store.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -245,11 +247,82 @@ function write(file, data) {
 
 
 
+async function migrateLocalUploadsToPersistentStorage() {
+  if (!process.env.DATABASE_URL) {
+    console.warn(
+      "ARWA media migration skipped: DATABASE_URL is not configured."
+    );
+    return;
+  }
+
+  if (!fs.existsSync(uploadDir)) {
+    return;
+  }
+
+  const filesToMigrate = fs.readdirSync(uploadDir);
+  let migrated = 0;
+
+  const mimeTypes = {
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".webp": "image/webp",
+    ".gif": "image/gif",
+    ".mp4": "video/mp4",
+    ".webm": "video/webm",
+    ".mov": "video/quicktime"
+  };
+
+  for (const filename of filesToMigrate) {
+    const filePath = path.join(uploadDir, filename);
+
+    let stat;
+
+    try {
+      stat = fs.statSync(filePath);
+    } catch {
+      continue;
+    }
+
+    if (!stat.isFile()) {
+      continue;
+    }
+
+    const buffer = fs.readFileSync(filePath);
+
+    if (!buffer.length) {
+      continue;
+    }
+
+    const ext = path.extname(filename).toLowerCase();
+    const mimeType =
+      mimeTypes[ext] || "application/octet-stream";
+
+    await persistentSaveMedia(
+      filename,
+      mimeType,
+      buffer
+    );
+
+    migrated++;
+
+    console.log(
+      `ARWA media protected: ${filename} (${buffer.length} bytes)`
+    );
+  }
+
+  console.log(
+    `ARWA persistent media migration complete: ${migrated} file(s).`
+  );
+}
+
 const persistentStoreReady = initPersistentStore({
   orders: JSON.parse(fs.readFileSync(files.orders, "utf8")),
   products: JSON.parse(fs.readFileSync(files.products, "utf8")),
   posts: JSON.parse(fs.readFileSync(files.posts, "utf8")),
   subscribers: JSON.parse(fs.readFileSync(files.subscribers, "utf8"))
+}).then(async () => {
+  await migrateLocalUploadsToPersistentStorage();
 }).catch(error => {
   console.error(
     "ARWA PostgreSQL initialization failed:",
@@ -273,6 +346,34 @@ app.use(async (req, res, next) => {
 });
 
 app.use(express.json({ limit: "1mb" }));
+
+/* PERSISTENT MEDIA */
+
+app.get("/uploads/:filename", async (req, res, next) => {
+  const filename = path.basename(req.params.filename);
+
+  try {
+    const media = await persistentGetMedia(filename);
+
+    if (media) {
+      res.setHeader("Content-Type", media.mime_type);
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      return res.send(media.media_data);
+    }
+
+    const localFile = path.join(uploadDir, filename);
+
+    if (fs.existsSync(localFile)) {
+      return res.sendFile(localFile);
+    }
+
+    return res.status(404).send("Media not found.");
+  } catch (error) {
+    console.error("ARWA media read failed:", error.message);
+    return next(error);
+  }
+});
+
 app.use(express.static(
   path.join(__dirname, "public")
 ));
@@ -584,6 +685,17 @@ app.post(
     products.unshift(product);
 
     try {
+      if (
+        req.file &&
+        process.env.DATABASE_URL
+      ) {
+        await persistentSaveMedia(
+          req.file.filename,
+          req.file.mimetype,
+          fs.readFileSync(req.file.path)
+        );
+      }
+
       await write(
         files.products,
         products
